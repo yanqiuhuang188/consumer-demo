@@ -1,0 +1,18 @@
+server:
+  port: ${nimble.server.port}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${nimble.eureka.client.service-url.defaultZone}
+  instance:
+    hostname: ${nimble.eureka.instance.hostname}
+    instance-id: ${nimble.eureka.instance.instance-id}
+
+spring:
+  application:
+    name: ${nimble.spring.application.name}
+
+logging:
+  level:
+    root: ${nimble.logging.level.root}
