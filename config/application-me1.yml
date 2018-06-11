@@ -4,7 +4,7 @@ nimble:
       name: consumer
 
   server:
-    port: 7930
+    port: 7931
 
   eureka:
     client:
