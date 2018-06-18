@@ -9,7 +9,7 @@ nimble:
   eureka:
     client:
       service-url:
-        defaultZone: http://localhost:7900/eureka
+        defaultZone: http://eureka1:7901/eureka,http://eureka2:7902/eureka
     instance:
       hostname: localhost
       instance-id: ${spring.application.name}:${server.port}

@@ -1,6 +1,10 @@
 server:
   port: ${nimble.server.port}
 
+spring:
+  application:
+    name: ${nimble.spring.application.name}
+
 eureka:
   client:
     service-url:
@@ -9,9 +13,10 @@ eureka:
     hostname: ${nimble.eureka.instance.hostname}
     instance-id: ${nimble.eureka.instance.instance-id}
 
-spring:
-  application:
-    name: ${nimble.spring.application.name}
+# In spring cloud this setting is closed (default)
+feign:
+  hystrix:
+    enabled: true
 
 logging:
   level:

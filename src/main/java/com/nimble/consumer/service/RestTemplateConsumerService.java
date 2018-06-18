@@ -1,18 +1,15 @@
 package com.nimble.consumer.service;
 
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.nimble.consumer.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -22,25 +19,8 @@ public class RestTemplateConsumerService {
     private RestTemplate restTemplate;
 
     @Autowired
-    private LoadBalancerClient loadBalancerClient;
-
-    @Autowired
     DiscoveryClient discoveryClient;
 
-    @GetMapping("/consume/{id}")
-    public User findById(@PathVariable Long id) {
-        // provider.url-path: http://localhost:7901/provider/
-        System.out.println(this.microServiceNodeInfo());
-        return this.restTemplate.getForObject("http://provider/provide/" + id, User.class);
-    }
-
-    @GetMapping("/microServiceNodeInfo")
-    public String microServiceNodeInfo() {
-        ServiceInstance serviceInstance = this.loadBalancerClient.choose("provider");
-        return serviceInstance.toString();
-    }
-
-    @RequestMapping("/registered")
     public void getRegistered() {
         List<String> serviceList = discoveryClient.getServices();
         for (String service : serviceList) {
@@ -56,4 +36,21 @@ public class RestTemplateConsumerService {
         }
     }
 
+    @HystrixCommand(fallbackMethod = "providerFallback")
+    public User findById(Long id) {
+        // provider.url-path: http://localhost:7901/provider/
+        return this.restTemplate.getForObject("http://provider/provide/" + id, User.class);
+    }
+
+    // TODO 这里有个问题，直接调用服务是可以抛出fallback对象的，但是通过zuul网关调用就会抛出错误。
+    public User providerFallback(Long id) {
+        System.out.println("异常发生（RestTemplate方式），进入fallback方法，接收的参数：id = " + id);
+        User user = new User();
+        user.setId(-1L);
+        user.setUserName("user_default");
+        user.setName("default");
+        user.setAge(0);
+        user.setBalance(new BigDecimal(0));
+        return user;
+    }
 }
